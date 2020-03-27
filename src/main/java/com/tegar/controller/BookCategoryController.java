@@ -32,11 +32,6 @@ public class BookCategoryController {
 	
 	@Autowired
 	private BookCategoryService bookCategoryService;
-	//param1 @requestbody & @valid harus berurutan
-	//@requestbody = payload(DTO)
-	//@valid = validasi properti
-	//param2
-	//BindingResult = hasil validasi
 	
 	@PostMapping("/save")
 	public BookCategoryModel save(@RequestBody @Valid BookCategoryRequestCreateModel request, 

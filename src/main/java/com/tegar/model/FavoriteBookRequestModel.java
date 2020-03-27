@@ -4,14 +4,16 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BookCategoryRequestUpdateModel extends BookCategoryRequestCreateModel{
+public class FavoriteBookRequestModel {
 	
-	@NotNull
-	private Integer id;
+	 @NotNull
+	 private Integer userId;
+	   
+	 @NotNull
+	 private Integer bookId;
+
 }

@@ -8,8 +8,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update # When you launch the application for the first time - switch "none" at "create"
+    properties:
+      hibernate:
+        default_schema: public
+        enable_lazy_load_no_trans: true
+        format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
     
 server:
-  port: 8080
+  port: 8081

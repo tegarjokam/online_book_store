@@ -1,7 +1,5 @@
 package com.tegar.model;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
@@ -10,8 +8,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BookCategoryRequestUpdateModel extends BookCategoryRequestCreateModel{
+public class UserModel extends PersistenceModel{
 	
-	@NotNull
-	private Integer id;
+	 private String username;
+	 private String fullName;
+	 private String email;
+	 private String phoneNumber;
+	 private String address;
 }
