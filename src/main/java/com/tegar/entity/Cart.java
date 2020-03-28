@@ -18,16 +18,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "favorite_book")
+@Table(name = "cart")
 @Where(clause = "status = 'ACTIVE'")
-public class FavoriteBook extends Persistence{
-	private static final long serialVersionUID = -1079959320014409414L;
+public class Cart extends Persistence{
+	private static final long serialVersionUID = 5408939619179332778L;
 	
 	@JoinColumn(name = "user_id")
 	@OneToOne(targetEntity = User.class, fetch = FetchType.LAZY)
 	private User user;
 	
 	@Where(clause = "status = 'ACTIVE'")
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "favoriteBook", fetch = FetchType.LAZY)
-	private Set<FavoriteBookDetail> favoriteBookDetails;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "cart", fetch = FetchType.LAZY)
+	private Set<CartDetail> cartDetails;
+
 }

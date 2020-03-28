@@ -20,6 +20,7 @@ import lombok.Setter;
 @Table(name = "book_category")
 @Where(clause = "status = 'ACTIVE'")
 public class BookCategory extends Persistence{
+	private static final long serialVersionUID = 3626318616512842601L;
 	
 	@Column(length = 100)
 	private String name;

@@ -26,7 +26,6 @@ import lombok.Setter;
 @Table(name = "user")
 @Where(clause = "status = 'ACTIVE'")
 public class User extends Persistence implements Serializable{
-	
 	private static final long serialVersionUID = 4457669404205697511L;
 	
 	@NotNull

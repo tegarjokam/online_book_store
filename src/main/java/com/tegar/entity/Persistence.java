@@ -1,5 +1,6 @@
 package com.tegar.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -23,7 +24,8 @@ import lombok.Data;
 
 @Data
 @MappedSuperclass
-public class Persistence {
+public class Persistence implements Serializable {
+	private static final long serialVersionUID = -3268940466026097783L;
 	
 	public enum Status {
 		ACTIVE, NOT_ACTIVE

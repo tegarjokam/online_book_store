@@ -17,7 +17,6 @@ import lombok.Setter;
 @Table(name = "favorite_book_detail")
 @Where(clause = "status = 'ACTIVE'")
 public class FavoriteBookDetail extends Persistence{
-
 	private static final long serialVersionUID = 1130010943968579177L;
 	
 	@JoinColumn(name = "book_id")
