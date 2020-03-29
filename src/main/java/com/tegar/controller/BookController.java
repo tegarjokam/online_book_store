@@ -43,7 +43,6 @@ public class BookController {
 			System.out.println("error ..........");
 			return bookModel;
 		} else {
-			System.out.println(request);
 			BeanUtils.copyProperties(request, bookModel);
 			return bookService.saveOrUpdate(bookModel);
 		}
