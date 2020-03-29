@@ -107,12 +107,44 @@ public class CartServiceImpl implements CartService {
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public CartModel findById(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		CartModel cartModel = new CartModel();
+		Cart cart = new Cart();
+		UserModel userModel = new UserModel();
+		//cari cart pada database dengan id dan tampung dalam variabel
+		cart = cartRepository.findById(id).orElse(null);
+
+		BeanUtils.copyProperties(cart.getUser(), userModel);
+		cartModel.setUserModel(userModel);
+		
+		List<CartModel.DetailModel> details = new ArrayList<>();
+		//looping getdatadetail pada cart
+		cart.getCartDetails().forEach(data -> {
+			BookModel bookModel = new BookModel();
+			BookCategoryModel bookCategoryModel = new BookCategoryModel();
+			DetailModel detail = new DetailModel();
+			
+			BeanUtils.copyProperties(data.getBook().getBookCategory(), bookCategoryModel);
+			bookModel.setBookCategory(bookCategoryModel);
+			
+			BeanUtils.copyProperties(data.getBook(), bookModel);
+			detail.setBookModel(bookModel);
+			
+			BeanUtils.copyProperties(data, detail);
+			details.add(detail);
+		});
+		
+		//set details
+		cartModel.setDetails(details);
+		BeanUtils.copyProperties(cart, cartModel);
+
+		//push kedalam detailmodel(details) pada cartmodel
+		return cartModel;
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public List<CartModel> findAll() {
 		List<CartModel> listCartModel = new ArrayList<CartModel>();
 		cartRepository.findAll().forEach(data -> {
@@ -130,8 +162,7 @@ public class CartServiceImpl implements CartService {
 				CartModel.DetailModel detail = new DetailModel();
 				BookModel bookModel = new BookModel();
 				BookCategoryModel bookCategoryModel = new BookCategoryModel();
-				
-				// copy category book model pada cartDetails
+
 				BeanUtils.copyProperties(cartDetails.getBook().getBookCategory(), bookCategoryModel);
 				bookModel.setBookCategory(bookCategoryModel);
 				
@@ -161,13 +192,42 @@ public class CartServiceImpl implements CartService {
 
 	@Override
 	public CartModel deleteByCartDetailId(Integer cartDetailId) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public CartModel findByUserId(Integer userId) {
-		// TODO Auto-generated method stub
-		return null;
+		CartModel cartModel = new CartModel();
+		Cart cart = new Cart();
+		UserModel userModel = new UserModel();
+		
+		cart = cartRepository.findByUserId(userId);
+		BeanUtils.copyProperties(cart.getUser(), userModel);
+		cartModel.setUserModel(userModel);
+		
+		List<CartModel.DetailModel> details = new ArrayList<CartModel.DetailModel>();
+		
+		cart.getCartDetails().forEach(data -> {
+			BookModel bookModel = new BookModel();
+			BookCategoryModel bookCategoryModel = new BookCategoryModel();
+			DetailModel detail = new DetailModel();
+			
+			BeanUtils.copyProperties(data.getBook().getBookCategory(), bookCategoryModel);
+			bookModel.setBookCategory(bookCategoryModel);
+			
+			BeanUtils.copyProperties(data.getBook(), bookModel);
+			detail.setBookModel(bookModel);
+			
+			BeanUtils.copyProperties(data, detail);
+			details.add(detail);
+		});
+		
+		cartModel.setDetails(details);
+		BeanUtils.copyProperties(cart, cartModel);
+		
+		return cartModel;
 	}
 
 }

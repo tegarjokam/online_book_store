@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +30,8 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
-	@PostMapping(name = "/save")
-	private String saveOrUpdate(@RequestBody @Valid CartRequestModel request,
+	@PostMapping(value = "/save")
+	public String saveOrUpdate(@RequestBody @Valid CartRequestModel request,
 			BindingResult result,
 			HttpServletResponse response) throws IOException {
 		if (result.hasErrors()) {
@@ -41,8 +42,18 @@ public class CartController {
 		}
 	}
 	
-	@GetMapping(name = "/findAll")
-	private List<CartModel> findAll() {
+	@GetMapping(value = "/findAll")
+	public List<CartModel> findAll() {
 		return cartService.findAll();
+	}
+	
+	@GetMapping(value = "/findById/{id}")
+	public CartModel findById(@PathVariable(value = "id") final Integer id) {
+		return cartService.findById(id);
+	}
+	
+	@GetMapping(value = "/findByUserId/{userId}")
+	public CartModel findByUserId(@PathVariable(value = "userId") final Integer userId) {
+		return cartService.findByUserId(userId);
 	}
 }
