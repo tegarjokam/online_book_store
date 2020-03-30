@@ -1,11 +1,9 @@
 package com.tegar.implement;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,18 +15,17 @@ import com.tegar.entity.Book;
 import com.tegar.entity.Cart;
 import com.tegar.entity.CartDetail;
 import com.tegar.entity.CartDetail.CartDetailStatus;
+import com.tegar.entity.Persistence.Status;
 import com.tegar.entity.User;
-import com.tegar.model.BookCategoryModel;
-import com.tegar.model.BookModel;
 import com.tegar.model.CartModel;
-import com.tegar.model.CartModel.DetailModel;
 import com.tegar.model.CartRequestModel;
-import com.tegar.model.UserModel;
 import com.tegar.repository.BookRepository;
 import com.tegar.repository.CartDetailRepository;
 import com.tegar.repository.CartRepository;
 import com.tegar.repository.UserRepository;
 import com.tegar.service.CartService;
+
+import static com.tegar.util.CartModelMapper.constructModel;;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -44,7 +41,7 @@ public class CartServiceImpl implements CartService {
 	
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Override
 	public CartModel saveOrUpdate(CartModel entity) {
 		// TODO Auto-generated method stub
@@ -53,7 +50,7 @@ public class CartServiceImpl implements CartService {
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public String saveOrUpdate(CartRequestModel entity) {
+	public CartModel saveOrUpdate(CartRequestModel entity) {
 		User user = userRepository.findById(entity.getUserId()).orElse(null);
 		//check for user
 		if (user == null)
@@ -80,18 +77,18 @@ public class CartServiceImpl implements CartService {
 			Book book = bookRepository.findById(entity.getBookId()).orElse(null);
 			if (book == null) 
 				throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Book with id : " + entity.getBookId() + " not found.");
-			List<CartDetail> currentCartDetails = cartDetailRepository.findByUserIdAndBookId(user.getId(), book.getId());
+			List<CartDetail> currentCartDetails = cartDetailRepository.findByUserIdAndBookIdAndDetailStatus(user.getId(), book.getId(), CartDetailStatus.CARTED);
 			if (currentCartDetails == null || currentCartDetails.size() == 0) {
 				CartDetail cartDetail = new CartDetail();
 				cartDetail.setBook(book);
 				cartDetail.setCart(cart);
 				cartDetail.setCartDetailStatus(CartDetailStatus.CARTED);
 				cartDetail = cartDetailRepository.save(cartDetail);
-				currentCartDetails.add(cartDetail);
+				cartDetails.add(cartDetail);
 			}
 		}
 		cart.setCartDetails(cartDetails);
-		return "sukses menambahkan cart ^_^";
+		return constructModel(cart);
 	}
 
 	@Override
@@ -109,79 +106,13 @@ public class CartServiceImpl implements CartService {
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public CartModel findById(Integer id) {
-		CartModel cartModel = new CartModel();
-		Cart cart = new Cart();
-		UserModel userModel = new UserModel();
-		//cari cart pada database dengan id dan tampung dalam variabel
-		cart = cartRepository.findById(id).orElse(null);
-
-		BeanUtils.copyProperties(cart.getUser(), userModel);
-		cartModel.setUserModel(userModel);
-		
-		List<CartModel.DetailModel> details = new ArrayList<>();
-		//looping getdatadetail pada cart
-		cart.getCartDetails().forEach(data -> {
-			BookModel bookModel = new BookModel();
-			BookCategoryModel bookCategoryModel = new BookCategoryModel();
-			DetailModel detail = new DetailModel();
-			
-			BeanUtils.copyProperties(data.getBook().getBookCategory(), bookCategoryModel);
-			bookModel.setBookCategory(bookCategoryModel);
-			
-			BeanUtils.copyProperties(data.getBook(), bookModel);
-			detail.setBookModel(bookModel);
-			
-			BeanUtils.copyProperties(data, detail);
-			details.add(detail);
-		});
-		
-		//set details
-		cartModel.setDetails(details);
-		BeanUtils.copyProperties(cart, cartModel);
-
-		//push kedalam detailmodel(details) pada cartmodel
-		return cartModel;
+		return constructModel(cartRepository.findById(id).orElse(null));
 	}
 
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public List<CartModel> findAll() {
-		List<CartModel> listCartModel = new ArrayList<CartModel>();
-		cartRepository.findAll().forEach(data -> {
-			CartModel cartModel = new CartModel();
-			UserModel userModel = new UserModel();
-			//set user model
-			BeanUtils.copyProperties(data.getUser(), userModel);
-			cartModel.setUserModel(userModel);
-			
-			//tampung list detailmodel pada cart
-			List<CartModel.DetailModel> details = new ArrayList<>();
-			
-			//tambahkan data cartdetail pada list details
-			data.getCartDetails().forEach(cartDetails -> {
-				CartModel.DetailModel detail = new DetailModel();
-				BookModel bookModel = new BookModel();
-				BookCategoryModel bookCategoryModel = new BookCategoryModel();
-
-				BeanUtils.copyProperties(cartDetails.getBook().getBookCategory(), bookCategoryModel);
-				bookModel.setBookCategory(bookCategoryModel);
-				
-				BeanUtils.copyProperties(cartDetails.getBook(), bookModel);
-				detail.setBookModel(bookModel);
-				
-				BeanUtils.copyProperties(cartDetails, detail);
-				details.add(detail);
-			});
-			// tambahkan cartDetails pada cartModel
-			cartModel.setDetails(details);
-			
-			// atur semua properti yg ada pada data ke CartModel
-			BeanUtils.copyProperties(data, cartModel);
-			
-			// tambahkan cartModel pada ListCartModel
-			listCartModel.add(cartModel);
-		});
-		return listCartModel;
+		return constructModel(cartRepository.findAll());
 	}
 
 	@Override
@@ -191,43 +122,21 @@ public class CartServiceImpl implements CartService {
 	}
 
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public CartModel deleteByCartDetailId(Integer cartDetailId) {
-		// TODO Auto-generated method stub
-		return null;
+		CartDetail cartDetail = cartDetailRepository.findById(cartDetailId).orElse(null);
+		if (cartDetail == null) {
+			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "cart with id " + cartDetailId + " not found.");
+		}
+		cartDetail.setStatus(Status.NOT_ACTIVE);
+		cartDetail = cartDetailRepository.save(cartDetail);
+		return constructModel(cartDetail.getCart());
 	}
 
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public CartModel findByUserId(Integer userId) {
-		CartModel cartModel = new CartModel();
-		Cart cart = new Cart();
-		UserModel userModel = new UserModel();
-		
-		cart = cartRepository.findByUserId(userId);
-		BeanUtils.copyProperties(cart.getUser(), userModel);
-		cartModel.setUserModel(userModel);
-		
-		List<CartModel.DetailModel> details = new ArrayList<CartModel.DetailModel>();
-		
-		cart.getCartDetails().forEach(data -> {
-			BookModel bookModel = new BookModel();
-			BookCategoryModel bookCategoryModel = new BookCategoryModel();
-			DetailModel detail = new DetailModel();
-			
-			BeanUtils.copyProperties(data.getBook().getBookCategory(), bookCategoryModel);
-			bookModel.setBookCategory(bookCategoryModel);
-			
-			BeanUtils.copyProperties(data.getBook(), bookModel);
-			detail.setBookModel(bookModel);
-			
-			BeanUtils.copyProperties(data, detail);
-			details.add(detail);
-		});
-		
-		cartModel.setDetails(details);
-		BeanUtils.copyProperties(cart, cartModel);
-		
-		return cartModel;
+		return constructModel(cartRepository.findByUserId(userId));
 	}
 
 }

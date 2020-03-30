@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,12 +32,13 @@ public class CartController {
 	private CartService cartService;
 
 	@PostMapping(value = "/save")
-	public String saveOrUpdate(@RequestBody @Valid CartRequestModel request,
+	public CartModel saveOrUpdate(@RequestBody @Valid CartRequestModel request,
 			BindingResult result,
 			HttpServletResponse response) throws IOException {
+		CartModel cartModel = new CartModel();
 		if (result.hasErrors()) {
 			response.sendError(HttpStatus.BAD_REQUEST.value(), result.getAllErrors().toString());
-			return "Error";
+			return cartModel;
 		} else {
 			return cartService.saveOrUpdate(request);
 		}
@@ -55,5 +57,10 @@ public class CartController {
 	@GetMapping(value = "/findByUserId/{userId}")
 	public CartModel findByUserId(@PathVariable(value = "userId") final Integer userId) {
 		return cartService.findByUserId(userId);
+	}
+	
+	@DeleteMapping(value = "/deleteByCartDetailId/{cartDetailId}")
+	public CartModel deleteByCartDetailId(@PathVariable(value = "cartDetailId") final Integer cartDetailId) {
+		return cartService.deleteByCartDetailId(cartDetailId);
 	}
 }

@@ -7,10 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.tegar.entity.CartDetail;
+import com.tegar.entity.CartDetail.CartDetailStatus;
 
 @Repository
 public interface CartDetailRepository extends JpaRepository<CartDetail, Integer>{
 
-	@Query(value = "FROM CartDetail detail WHERE detail.cart.user.id = ?1 AND detail.book.id = ?2")
-	List<CartDetail> findByUserIdAndBookId(Integer userId, Integer bookId);
+	@Query(value = "FROM CartDetail detail WHERE detail.cart.user.id = ?1 AND detail.book.id = ?2 AND detail.cartDetailStatus = ?3")
+	List<CartDetail> findByUserIdAndBookIdAndDetailStatus(Integer userId, Integer bookId, CartDetailStatus status);
 }

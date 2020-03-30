@@ -5,7 +5,7 @@ import com.tegar.model.CartRequestModel;
 
 public interface CartService extends PersistenceService<CartModel, Integer>{
 	
-	String saveOrUpdate(CartRequestModel entity);
+	CartModel saveOrUpdate(CartRequestModel entity);
 	
 	CartModel deleteByCartDetailId(Integer cartDetailId);
 	
