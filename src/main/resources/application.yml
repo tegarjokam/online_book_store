@@ -16,6 +16,17 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+security:
+  oauth2:
+    client:
+      resource-ids: onlinebookstore-resource-id
+      id: onlinebookstore-client-id
+      client-id: onlinebookstore-secret
+      access-token-validity-seconds: 43200
+      refresh-token-validity-seconds: 2592000
+      authorized-grant-types: password,authorization_code,refresh_token
+      scope: read,write
+
     
 server:
-  port: 8080
+  port: 8081
