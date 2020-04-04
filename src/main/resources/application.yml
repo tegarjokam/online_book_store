@@ -26,7 +26,6 @@ security:
       refresh-token-validity-seconds: 2592000
       authorized-grant-types: password,authorization_code,refresh_token
       scope: read,write
-
-    
+      
 server:
   port: 8081
