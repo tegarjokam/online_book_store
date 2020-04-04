@@ -13,6 +13,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
+import com.tegar.service.UserService;
+
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -21,7 +23,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	private AuthenticationManager authenticationManager;
 	
 	@Autowired
-	private UserDetailsService userDetailsService;
+	private UserService userService;
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -29,7 +31,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	@Value("${security.oauth2.client.id}")
 	private String clientId;
 	
-	@Value("${security.oauth2.client.client-id}")
+	@Value("${security.oauth2.client.client-secret}")
 	private String clientSecret;
 	
 	@Value("${security.oauth2.client.access-token-validity-seconds}")
@@ -44,7 +46,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	@Value("${security.oauth2.client.scope}")
 	private String[] scopes;
 	
-	@Value("${security.oauth2.client.resource.id}")
+	@Value("${security.oauth2.resource.id}")
 	private String resourceId;
 	
 	@Override
@@ -60,14 +62,14 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	}
 
 	@Override
-	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+	public void configure(final AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints.accessTokenConverter(accessTokenConverter())
-					.userDetailsService(userDetailsService)
+					.userDetailsService(userService)
 					.authenticationManager(authenticationManager);
 	}
 	
 	@Bean
-	private JwtAccessTokenConverter accessTokenConverter() {
+	public JwtAccessTokenConverter accessTokenConverter() {
 		return new JwtAccessTokenConverter();
 	}
 }
