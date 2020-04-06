@@ -1,5 +1,6 @@
 package com.tegar.implement;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -127,8 +128,17 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	public TransactionModel update(TransactionUpdateRequestModel request) {
-		// TODO Auto-generated method stub
-		return null;
+		Transaction transaction = transactionRepository.findById(request.getTransactionId()).orElse(null);
+		if (transaction == null) 
+			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Transaction with id : " + request.getTransactionId() + "not found.");
+		
+		transaction.setReceiptImageUrl(request.getReceiptImageUrl());
+		transaction.setTransactionStatus(TransactionStatus.SETTLED);
+		transaction.setPaymentTime(new Date());
+		transaction = transactionRepository.save(transaction);
+		
+		log.info("TRANSACTION ===>>   " + transaction.toString());
+		return constructModel(transaction);
 	}
 
 	@Override

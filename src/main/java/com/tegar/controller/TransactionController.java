@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tegar.model.TransactionCreateRequestModel;
 import com.tegar.model.TransactionModel;
+import com.tegar.model.TransactionUpdateRequestModel;
 import com.tegar.service.TransactionService;
 
 import io.swagger.annotations.Api;
@@ -60,6 +61,19 @@ public class TransactionController {
 	public List<TransactionModel> findByUserId(@PathVariable("userId") final Integer userId) {
 		return transactionService.findByUserId(userId); 
 	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+	@PostMapping("/payment")
+	public TransactionModel payment(@RequestBody @Valid TransactionUpdateRequestModel request,
+			BindingResult result, HttpServletResponse response) throws IOException {
+		TransactionModel transactionModel = new TransactionModel();
+		if (result.hasErrors()) {
+			response.sendError(HttpStatus.BAD_REQUEST.value(), result.getAllErrors().toString());
+			return transactionModel;
+		} else
+			return transactionService.update(request);
+	}
+	
 
 
 
