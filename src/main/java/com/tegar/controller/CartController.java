@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,7 @@ public class CartController {
 	@Autowired
 	private CartService cartService;
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@PostMapping(value = "/save")
 	public CartModel saveOrUpdate(@RequestBody @Valid CartRequestModel request,
 			BindingResult result,
@@ -44,21 +46,25 @@ public class CartController {
 		}
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@GetMapping(value = "/findAll")
 	public List<CartModel> findAll() {
 		return cartService.findAll();
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@GetMapping(value = "/findById/{id}")
 	public CartModel findById(@PathVariable(value = "id") final Integer id) {
 		return cartService.findById(id);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@GetMapping(value = "/findByUserId/{userId}")
 	public CartModel findByUserId(@PathVariable(value = "userId") final Integer userId) {
 		return cartService.findByUserId(userId);
 	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@DeleteMapping(value = "/deleteByCartDetailId/{cartDetailId}")
 	public CartModel deleteByCartDetailId(@PathVariable(value = "cartDetailId") final Integer cartDetailId) {
 		return cartService.deleteByCartDetailId(cartDetailId);
