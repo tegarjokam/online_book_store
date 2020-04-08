@@ -1,5 +1,8 @@
 package com.tegar.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 
 import com.tegar.entity.Shipment;
@@ -19,6 +22,14 @@ public class ShipmentModelMapper {
 		
 		BeanUtils.copyProperties(shipment, shipmentModel);
 		return shipmentModel;
+	}
+	
+	public static List<ShipmentModel> constructModel(List<Shipment> shipmentList) {
+		List<ShipmentModel> shipments = new ArrayList<ShipmentModel>();
+		shipmentList.forEach(data -> {
+			shipments.add(constructModel(data));
+		});
+		return shipments;
 	}
 
 }

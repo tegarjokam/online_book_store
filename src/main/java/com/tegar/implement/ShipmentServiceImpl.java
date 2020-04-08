@@ -2,6 +2,7 @@ package com.tegar.implement;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -60,20 +61,21 @@ public class ShipmentServiceImpl implements ShipmentService {
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public ShipmentModel findById(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		return constructModel(shipmentRepository.findById(id).orElse(null));
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public List<ShipmentModel> findAll() {
-		return null;
+		return constructModel(shipmentRepository.findAll());
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public Long countAll() {
-		// TODO Auto-generated method stub
-		return null;
+		return shipmentRepository.count();
 	}
 
 	@Override
@@ -108,15 +110,30 @@ public class ShipmentServiceImpl implements ShipmentService {
 	}
 
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public ShipmentModel update(ShipmentUpdateRequestModel request) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Shipment shipment = shipmentRepository.findById(request.getShipmentId()).orElse(null);
+		if (shipment == null)
+			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Shipment with id : " + request.getShipmentId() + " not found.");
+		
+		if (request.getShipmentStatus().equals(ShipmentStatus.ORDERED))
+			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Shipment with id : " + request.getShipmentId() + " already ORDERED");
+		
+		if (StringUtils.isNotBlank(request.getTrackingNumber())) {
+			shipment.setTrackingNumber(request.getTrackingNumber());;
+		}
+		shipment.setShipmentStatus(request.getShipmentStatus());
+		
+		shipment = shipmentRepository.save(shipment);
+		
+		return constructModel(shipment);
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public List<ShipmentModel> findByUserId(Integer userId) {
-		// TODO Auto-generated method stub
-		return null;
+		return constructModel(shipmentRepository.findByUserId(userId));
 	}
 
 }
