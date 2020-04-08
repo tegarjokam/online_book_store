@@ -45,7 +45,7 @@ public class Transaction extends Persistence{
 	private String receiptImageUrl;
 	
 	@Column 
-	@Temporal(TemporalType.TIMESTAMP) 
+	@Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
 	private Date paymentTime;
 	
