@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,6 +34,8 @@ import com.tegar.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.tegar.util.TransactionModelMapper.constructModel;
+
+import static com.tegar.util.PageRequestUtil.constructPageRequest;
 
 @Service
 @Slf4j
@@ -146,4 +150,21 @@ public class TransactionServiceImpl implements TransactionService {
 		return constructModel(transactionRepository.findByUserId(userId));
 	}
 
+	@Override
+	public Page<TransactionModel> findByUserOrInvoice(String fullName, String invoiceNumber, Integer page,
+			Integer perPage) {
+		if (StringUtils.isNotBlank(fullName)) {
+			return transactionRepository.findByUserFullNameContainsIgnoreCase(fullName, constructPageRequest(page, perPage)).map(data -> {
+				return constructModel(data);
+			});
+		} else if (StringUtils.isNotBlank(invoiceNumber)) {
+			return transactionRepository.findByInvoiceNumberContainsIgnoreCase(invoiceNumber, constructPageRequest(page, perPage)).map(data -> {
+				return constructModel(data);
+			});
+		} else {
+			return transactionRepository.findAll(constructPageRequest(page, perPage)).map(data -> {
+				return constructModel(data);
+			});
+		}
+	}
 }
