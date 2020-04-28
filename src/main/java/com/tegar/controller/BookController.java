@@ -1,5 +1,9 @@
 package com.tegar.controller;
 
+import static com.tegar.util.EndpointConstant.PAGE;
+import static com.tegar.util.EndpointConstant.PER_PAGE;
+import static com.tegar.util.EndpointConstant.TITLE;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -8,6 +12,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -126,6 +131,16 @@ public class BookController {
 			return bookService.saveOrUpdateWithImg(bookModel, file);
 		}
 	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CLIENT', 'ROLE_USER')")
+	@GetMapping("/lists")
+	public Page<BookModel> getListBooks(
+			@RequestParam(value = PAGE, required = false) Integer page,
+			@RequestParam(value = PER_PAGE, required = false) Integer perPage,
+			@RequestParam(value = TITLE, required = false) String title){
+		return bookService.findAll(page, perPage, title);
+	}
+	
 	
 
 }

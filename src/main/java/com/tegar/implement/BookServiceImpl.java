@@ -1,14 +1,18 @@
 package com.tegar.implement;
 
+import static com.tegar.util.PageRequestUtil.constructPageRequest;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -25,7 +29,6 @@ import com.tegar.repository.BookCategoryRepository;
 import com.tegar.repository.BookRepository;
 import com.tegar.service.BookService;
 import com.tegar.service.MinioService;
-
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -211,4 +214,33 @@ public class BookServiceImpl implements BookService {
 		entity.setBookCategory(bookCategoryModel);
 		return entity;
 	}
+
+	@Override
+	public Page<BookModel> findAll(Integer page, Integer perPage, String title) {
+		
+		if (StringUtils.isNotBlank(title)) {
+			return bookRepository.findByTitleContainsIgnoreCase(title, constructPageRequest(page, perPage)).map(data -> {
+			BookModel entity = new BookModel();
+			BeanUtils.copyProperties(data, entity);
+
+			BookCategoryModel bookCategoryModel = new BookCategoryModel();
+			BeanUtils.copyProperties(data.getBookCategory(), bookCategoryModel);
+			entity.setBookCategoryId(data.getBookCategory().getId());
+			entity.setBookCategory(bookCategoryModel);
+			return entity;
+		});
+		} else {
+			return bookRepository.findAll(constructPageRequest(page, perPage)).map(data -> {
+				BookModel entity = new BookModel();
+				BeanUtils.copyProperties(data, entity);
+	
+				BookCategoryModel bookCategoryModel = new BookCategoryModel();
+				BeanUtils.copyProperties(data.getBookCategory(), bookCategoryModel);
+				entity.setBookCategoryId(data.getBookCategory().getId());
+				entity.setBookCategory(bookCategoryModel);
+				return entity;
+			});
+		}
+	}
+
 }

@@ -8,5 +8,6 @@ import com.tegar.model.UserRequestModel;
 public interface UserService extends UserDetailsService {
 	
 	UserModel register(UserRequestModel userRequestModel);
+	UserModel findByUsername(String username);
 
 }

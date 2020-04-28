@@ -28,6 +28,7 @@ public class TransactionModel extends PersistenceModel{
 	
 	private List<DetailModel> details;
 	
+	@Getter
 	@Setter
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class DetailModel extends PersistenceModel {

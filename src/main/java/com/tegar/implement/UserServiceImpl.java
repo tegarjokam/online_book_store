@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +29,6 @@ import com.tegar.repository.UserRepository;
 import com.tegar.service.UserService;
 
 @Service
-//@Slf4j
 public class UserServiceImpl implements UserService {
 	
 	@Autowired
@@ -38,6 +39,8 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -81,11 +84,20 @@ public class UserServiceImpl implements UserService {
 		UserModel userModel = new UserModel();
 		BeanUtils.copyProperties(newUser, userModel);
 		
-//		log.info("------------------  LOGGGGIIINNNGGG  WWIIITTTTHHH LLLLOOOMMMBBBOOKKKKKKK ----------------");
-//		log.info("USER MODE ==>>>>" + userModel.toString());
-//		log.info("NEW USER ===>>>" + newUser.toString());
-//		log.info("USER REQEUST MODEL ====>>>" + userRequestModel.toString());
+		return userModel;
+	}
+
+	@Override
+	public UserModel findByUsername(String username) {
 		
+		User user = userRepository.findByUsername(username);
+		if (user == null) 
+			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "username not found.");
+		 
+		UserModel userModel = new UserModel();
+		BeanUtils.copyProperties(user, userModel);
+		
+		logger.info(userModel.toString());
 		return userModel;
 	}
 	

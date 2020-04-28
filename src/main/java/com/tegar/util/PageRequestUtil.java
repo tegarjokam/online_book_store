@@ -4,7 +4,7 @@ import org.springframework.data.domain.PageRequest;
 
 public class PageRequestUtil {
 	
-	public static final int MAX_PAGE = 10;
+	public static final int MAX_PAGE = 12;
 	
 	public static PageRequest constructPageRequest(Integer page, Integer perPage) {
 		if (page == null)

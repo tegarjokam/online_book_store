@@ -43,4 +43,10 @@ public class UserController {
 			return userService.register(request);
 		}
 	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+	@GetMapping("/{username}")
+	public UserModel profile(@PathVariable("username") String username) {
+		return userService.findByUsername(username);
+	}
 }
