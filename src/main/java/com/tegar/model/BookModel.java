@@ -18,6 +18,7 @@ public class BookModel extends PersistenceModel {
 	private String isbn;
 	private String authorName;
 	private String synopsis;
+	private String imageUrl;
 	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "GMT+7")
 	private Date publicationDate;

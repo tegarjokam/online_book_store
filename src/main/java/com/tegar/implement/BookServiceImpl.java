@@ -1,8 +1,12 @@
 package com.tegar.implement;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tegar.entity.Book;
 import com.tegar.entity.BookCategory;
@@ -19,16 +24,23 @@ import com.tegar.model.BookModel;
 import com.tegar.repository.BookCategoryRepository;
 import com.tegar.repository.BookRepository;
 import com.tegar.service.BookService;
+import com.tegar.service.MinioService;
+
 
 @Service
 public class BookServiceImpl implements BookService {
 	
 	@Autowired
-	BookRepository bookRepository;
+	private BookRepository bookRepository;
 	
 	@Autowired
-	BookCategoryRepository bookCategoryRepository;
+	private BookCategoryRepository bookCategoryRepository;
+	
+	@Autowired
+	private MinioService minioService;
 
+	Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
+	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public BookModel saveOrUpdate(BookModel entity) {
@@ -58,7 +70,6 @@ public class BookServiceImpl implements BookService {
 		BeanUtils.copyProperties(book, entity);
 		entity.setBookCategoryId(bookCategoryModel.getId());
 		entity.setBookCategory(bookCategoryModel);
-		System.out.println(entity.toString());
 		return entity;
 	}
 
@@ -140,6 +151,64 @@ public class BookServiceImpl implements BookService {
 		return bookRepository.count();
 	}
 
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public BookModel uploadImg(Integer id, MultipartFile file) {
+		BookModel entity = new BookModel();
+		Book book = bookRepository.findById(id).orElse(null);
+		if (book == null)
+			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Book with id: " + id + " not found");
+		
+		// upload image
+		try {
+			String imageUrl = minioService.uploadImg(UUID.randomUUID().toString(),
+					file.getInputStream(), file.getContentType());
+			book.setImageUrl(imageUrl);
+			book = bookRepository.save(book);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Problem upload file");
+		}
+		BeanUtils.copyProperties(book, entity);
+		return entity;
+	}
 
-
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public BookModel saveOrUpdateWithImg(BookModel entity, MultipartFile file) throws IOException, Exception {
+		Book book = new Book();
+		BookCategory bookCategory;
+		if (entity.getId() != null) {
+			book = bookRepository.findById(entity.getId()).orElse(null);
+			if (book == null) 
+				throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Book with id:" + entity.getId() + " not found.");
+			if (!book.getBookCategory().getId().equals(entity.getBookCategoryId())) {
+				bookCategory = bookCategoryRepository.findById(entity.getBookCategoryId()).orElse(null);
+				book.setBookCategory(bookCategory);
+			}
+			BeanUtils.copyProperties(entity, book);
+			String imageUrl = minioService.uploadImg(UUID.randomUUID().toString(),file.getInputStream(), file.getContentType());
+			book.setImageUrl(imageUrl);
+			book = bookRepository.save(book);
+		} else
+			try {
+					bookCategory = bookCategoryRepository.findById(entity.getBookCategoryId()).orElse(null);
+					if (bookCategory == null) 
+						throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "Book Category with id: " + entity.getId() + " not found.");
+					book = new Book();
+					book.setBookCategory(bookCategory);
+					String imageUrl = minioService.uploadImg(UUID.randomUUID().toString(),file.getInputStream(), file.getContentType());
+					BeanUtils.copyProperties(entity, book);
+					book.setImageUrl(imageUrl);
+					book = bookRepository.save(book);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		BookCategoryModel bookCategoryModel = new BookCategoryModel();
+		BeanUtils.copyProperties(book.getBookCategory(), bookCategoryModel);
+		BeanUtils.copyProperties(book, entity);
+		entity.setBookCategoryId(bookCategoryModel.getId());
+		entity.setBookCategory(bookCategoryModel);
+		return entity;
+	}
 }

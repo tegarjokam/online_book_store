@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tegar.model.BookModel;
 import com.tegar.model.BookRequestCreateModel;
@@ -38,11 +42,10 @@ public class BookController {
 	@PostMapping(value = "/save")
 	public BookModel save(@RequestBody @Valid BookRequestCreateModel request,
 			BindingResult result,
-			HttpServletResponse response) throws IOException {
+			HttpServletResponse response) throws Exception {
 		BookModel bookModel = new BookModel();
 		if(result.hasErrors()) {
 			response.sendError(HttpStatus.BAD_REQUEST.value(), result.getAllErrors().toString());
-			System.out.println("error ..........");
 			return bookModel;
 		} else {
 			BeanUtils.copyProperties(request, bookModel);
@@ -58,10 +61,8 @@ public class BookController {
 		BookModel bookModel = new BookModel();
 		if(result.hasErrors()) {
 			response.sendError(HttpStatus.BAD_REQUEST.value(), result.getAllErrors().toString());
-			System.out.println("error ..........");
 			return bookModel;
 		} else {
-			System.out.println(request);
 			BeanUtils.copyProperties(request, bookModel);
 			return bookService.saveOrUpdate(bookModel);
 		}
@@ -85,6 +86,46 @@ public class BookController {
 		return bookService.findAll();
 	}
 	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@PostMapping("/uploadImg/{id}")
+	public BookModel uploadImg(@PathVariable("id") final Integer id, @RequestParam("file") MultipartFile file) {
+		return bookService.uploadImg(id, file);
+	}
+	
 
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@PostMapping(value = "/savePlusImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public BookModel savePlusImg(
+			@RequestPart(value = "bookRequestModel", required = true) @Valid BookRequestCreateModel request, 
+			@RequestPart(value = "file", required = true) MultipartFile file,
+			BindingResult result,
+			HttpServletResponse response) throws Exception {
+		BookModel bookModel = new BookModel();
+		if(result.hasErrors()) {
+			response.sendError(HttpStatus.BAD_REQUEST.value(), result.getAllErrors().toString());
+			return bookModel;
+		} else {
+			BeanUtils.copyProperties(request, bookModel);
+			return bookService.saveOrUpdateWithImg(bookModel, file);
+		}
+	}
+	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@PostMapping(value = "/updatePlusImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public BookModel updatePlusImg(
+			@RequestPart(value = "bookRequestModel", required = true) @Valid BookRequestUpdateModel request, 
+			@RequestPart(value = "file", required = true) MultipartFile file,
+			BindingResult result,
+			HttpServletResponse response) throws Exception {
+		BookModel bookModel = new BookModel();
+		if(result.hasErrors()) {
+			response.sendError(HttpStatus.BAD_REQUEST.value(), result.getAllErrors().toString());
+			return bookModel;
+		} else {
+			BeanUtils.copyProperties(request, bookModel);
+			return bookService.saveOrUpdateWithImg(bookModel, file);
+		}
+	}
+	
 
 }

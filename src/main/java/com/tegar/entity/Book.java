@@ -45,6 +45,9 @@ public class Book extends Persistence {
 	@Column(columnDefinition = "text")
 	private String synopsis;
 	
+	@Column(columnDefinition = "text")
+	private String imageUrl;
+	
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date publicationDate;
