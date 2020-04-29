@@ -88,6 +88,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public UserModel findByUsername(String username) {
 		
 		User user = userRepository.findByUsername(username);
