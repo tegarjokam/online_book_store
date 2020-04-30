@@ -132,7 +132,6 @@ public class BookController {
 		}
 	}
 	
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_CLIENT', 'ROLE_USER')")
 	@GetMapping("/lists")
 	public Page<BookModel> getListBooks(
 			@RequestParam(value = PAGE, required = false) Integer page,

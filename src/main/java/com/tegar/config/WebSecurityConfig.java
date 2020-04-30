@@ -32,6 +32,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring()
 			.antMatchers( 
 					"/api/rest/user/register",
+					"/api/rest/book/lists",
 					"/v2/api-docs",
 	                "/configuration/ui/**",
 	                "/swagger-resources/**",

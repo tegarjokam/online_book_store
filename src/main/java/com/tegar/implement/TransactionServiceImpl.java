@@ -110,7 +110,8 @@ public class TransactionServiceImpl implements TransactionService {
 		transaction.setInvoiceNumber(UUID.randomUUID().toString());
 		transaction.setPaymentMethod(PaymentMethod.BANK_TRANSFER); // if many options, it should be from request
 		transaction.setStatus(Status.ACTIVE);
-		transaction.setTransactionStatus(TransactionStatus.PENDING); transaction.setUser(user);
+		transaction.setTransactionStatus(TransactionStatus.PENDING); 
+		transaction.setUser(user);
 		transaction = transactionRepository.save(transaction);
 		
 		// detail
