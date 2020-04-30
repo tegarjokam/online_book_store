@@ -216,19 +216,37 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	public Page<BookModel> findAll(Integer page, Integer perPage, String title) {
+	public Page<BookModel> findAll(Integer page, Integer perPage, String title, String isbn) {
 		
 		if (StringUtils.isNotBlank(title)) {
-			return bookRepository.findByTitleContainsIgnoreCase(title, constructPageRequest(page, perPage)).map(data -> {
-			BookModel entity = new BookModel();
-			BeanUtils.copyProperties(data, entity);
-
-			BookCategoryModel bookCategoryModel = new BookCategoryModel();
-			BeanUtils.copyProperties(data.getBookCategory(), bookCategoryModel);
-			entity.setBookCategoryId(data.getBookCategory().getId());
-			entity.setBookCategory(bookCategoryModel);
-			return entity;
-		});
+			Page<BookModel> pageBook = bookRepository.findByTitleContainsIgnoreCase(title, constructPageRequest(page, perPage)).map(data -> {
+				BookModel entity = new BookModel();
+				BeanUtils.copyProperties(data, entity);
+	
+				BookCategoryModel bookCategoryModel = new BookCategoryModel();
+				BeanUtils.copyProperties(data.getBookCategory(), bookCategoryModel);
+				entity.setBookCategoryId(data.getBookCategory().getId());
+				entity.setBookCategory(bookCategoryModel);
+				return entity;
+			});
+			logger.info(Integer.toString(pageBook.getContent().size()));
+			if (pageBook.getContent().size() == 0)
+				throw new HttpServerErrorException(HttpStatus.NOT_FOUND, title + " is not found");
+			return pageBook;
+		} else if (StringUtils.isNotBlank(isbn)){
+			Page<BookModel> pageBook = bookRepository.findByIsbn(isbn, constructPageRequest(page, perPage)).map(data -> {
+				BookModel entity = new BookModel();
+				BeanUtils.copyProperties(data, entity);
+	
+				BookCategoryModel bookCategoryModel = new BookCategoryModel();
+				BeanUtils.copyProperties(data.getBookCategory(), bookCategoryModel);
+				entity.setBookCategoryId(data.getBookCategory().getId());
+				entity.setBookCategory(bookCategoryModel);
+				return entity;
+			});
+			if (pageBook.getContent().size() == 0)
+				throw new HttpServerErrorException(HttpStatus.NOT_FOUND, isbn + " is not found");
+			return pageBook;
 		} else {
 			return bookRepository.findAll(constructPageRequest(page, perPage)).map(data -> {
 				BookModel entity = new BookModel();

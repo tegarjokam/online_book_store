@@ -3,6 +3,7 @@ package com.tegar.controller;
 import static com.tegar.util.EndpointConstant.PAGE;
 import static com.tegar.util.EndpointConstant.PER_PAGE;
 import static com.tegar.util.EndpointConstant.TITLE;
+import static com.tegar.util.EndpointConstant.ISBN;
 
 import java.io.IOException;
 import java.util.List;
@@ -136,8 +137,9 @@ public class BookController {
 	public Page<BookModel> getListBooks(
 			@RequestParam(value = PAGE, required = false) Integer page,
 			@RequestParam(value = PER_PAGE, required = false) Integer perPage,
-			@RequestParam(value = TITLE, required = false) String title){
-		return bookService.findAll(page, perPage, title);
+			@RequestParam(value = TITLE, required = false) String title,
+			@RequestParam(value = ISBN, required = false) String isbn){
+		return bookService.findAll(page, perPage, title, isbn);
 	}
 	
 	

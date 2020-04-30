@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,8 @@ public class FavoriteBookServiceImpl implements FavoriteBookService {
 	 
 	@Autowired
 	private UserRepository userRepository;
+	
+	Logger logger = LoggerFactory.getLogger(FavoriteBookServiceImpl.class);
 
 	@Override
 	public FavoriteBookModel saveOrUpdate(FavoriteBookModel entity) {
@@ -134,6 +138,13 @@ public class FavoriteBookServiceImpl implements FavoriteBookService {
 	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 	public FavoriteBookModel findByUserId(Integer userId) {
 		return constructModel(favoriteBookRepository.findByUserId(userId));
+	}
+
+	@Override
+	@Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+	public FavoriteBookModel findByUserUsername(String username) {
+		logger.info(constructModel(favoriteBookRepository.findByUserEmail(username)).toString());
+		return constructModel(favoriteBookRepository.findByUserEmail(username));
 	}
 
 

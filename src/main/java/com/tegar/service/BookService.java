@@ -13,6 +13,6 @@ public interface BookService extends PersistenceService<BookModel, Integer> {
 	
 	BookModel saveOrUpdateWithImg(BookModel bookModel, MultipartFile file)  throws IOException, Exception;
 	
-	Page<BookModel> findAll(Integer page, Integer perPage, String title);
+	Page<BookModel> findAll(Integer page, Integer perPage, String title, String isbn);
 
 }

@@ -1,14 +1,17 @@
 package com.tegar.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,8 +57,11 @@ public class FavoriteBookController {
 	
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@GetMapping(value = "/findAll")
-	public List<FavoriteBookModel> findAll() {
-		return favoriteBookService.findAll();
+	public FavoriteBookModel findAll() {
+		Authentication user = getUser();
+		Logger logger = LoggerFactory.getLogger(FavoriteBookController.class);
+		logger.info(user.getName());
+		return favoriteBookService.findByUserUsername(user.getName().toString());
 	}
 	
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
@@ -69,5 +75,11 @@ public class FavoriteBookController {
 	public FavoriteBookModel findByUserId(@PathVariable(value = "userId") final Integer userId) {
 		return favoriteBookService.findByUserId(userId);
 	}
+	
+	public Authentication getUser() {
+		Authentication user = SecurityContextHolder.getContext().getAuthentication();
+		return user;
+	}
+	
 
 }

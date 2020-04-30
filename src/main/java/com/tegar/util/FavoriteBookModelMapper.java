@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
 import com.tegar.entity.FavoriteBook;
@@ -18,6 +20,8 @@ public class FavoriteBookModelMapper {
 
 	public static FavoriteBookModel constructModel(FavoriteBook favoriteBook) {
 			UserModel userModel = new UserModel(); 
+			Logger logger = LoggerFactory.getLogger(FavoriteBookModelMapper.class);
+			logger.info(favoriteBook.getUser().toString());
 			BeanUtils.copyProperties(favoriteBook.getUser(), userModel);
 			FavoriteBookModel model = new FavoriteBookModel();
 			// set userModel kedalam model
