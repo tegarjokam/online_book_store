@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tegar.entity.Book;
 import com.tegar.entity.BookCategory;
 import com.tegar.entity.Persistence.Status;
+import com.tegar.exception.BookServiceException;
 import com.tegar.model.BookCategoryModel;
 import com.tegar.model.BookModel;
 import com.tegar.repository.BookCategoryRepository;
@@ -231,7 +232,7 @@ public class BookServiceImpl implements BookService {
 			});
 			logger.info(Integer.toString(pageBook.getContent().size()));
 			if (pageBook.getContent().size() == 0)
-				throw new HttpServerErrorException(HttpStatus.NOT_FOUND, title + " is not found");
+				throw new BookServiceException(404, "Title tidak ditemukan");
 			return pageBook;
 		} else if (StringUtils.isNotBlank(isbn)){
 			Page<BookModel> pageBook = bookRepository.findByIsbn(isbn, constructPageRequest(page, perPage)).map(data -> {
@@ -245,7 +246,7 @@ public class BookServiceImpl implements BookService {
 				return entity;
 			});
 			if (pageBook.getContent().size() == 0)
-				throw new HttpServerErrorException(HttpStatus.NOT_FOUND, isbn + " is not found");
+				throw new BookServiceException(404, "isbn tidak ditemukan");
 			return pageBook;
 		} else {
 			return bookRepository.findAll(constructPageRequest(page, perPage)).map(data -> {
